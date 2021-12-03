@@ -1,6 +1,5 @@
 (defparameter *report* (uiop:read-file-lines "input/day3.txt"))
 
-(defparameter *report-length* (length *report*))
 (defparameter *number-length* (length (car *report*)))
 
 (defun majority-bit (nth report)
