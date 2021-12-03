@@ -25,12 +25,6 @@
 
 ;; Part II
 
-(defun oxygen-bit-criteria (nth report)
-  (majority-bit nth report))
-
-(defun CO2-bit-criteria (nth report)
-  (if (char-equal #\1 (oxygen-bit-criteria nth report)) #\0 #\1))
-
 (defun rating-template (criteria-fn num-len report)
   (loop with report = (copy-seq report)
         for index from 0 below num-len
@@ -43,10 +37,12 @@
         finally (return (parse-integer (car report) :radix 2))))
 
 (defun oxygen-rating (num-len report)
-  (rating-template #'oxygen-bit-criteria num-len report))
+  (rating-template #'majority-bit num-len report))
 
 (defun CO2-rating (num-len report)
-  (rating-template #'co2-bit-criteria num-len report))
+  (flet ((co2-bit-criteria (nth report)
+           (if (char-equal #\1 (majority-bit nth report)) #\0 #\1)))
+    (rating-template #'co2-bit-criteria num-len report)))
 
 (defun solve-second-part ()
   (* (oxygen-rating *number-length* *report*)
