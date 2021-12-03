@@ -4,11 +4,11 @@
 (defparameter *number-length* (length (car *report*)))
 
 (defun majority-bit (nth report)
-  (if (> (count #\0 (mapcar #'(lambda (seq) (elt seq nth))
-                            report))
-         (/ *report-length* 2))
-      #\0
-      #\1))
+  (if (>= (count #\1 (mapcar #'(lambda (seq) (elt seq nth))
+                                  report))
+          (/ (length report) 2))
+      #\1
+      #\0))
 
 (defun gamma-rate (num-len report)
   (parse-integer (coerce (loop for index from 0 below num-len
@@ -20,44 +20,34 @@
   (logxor gamma-rate
           (parse-integer (make-string num-len :initial-element #\1) :radix 2)))
 
-(defun solve-first-part (num-len report)
-  (let ((gamma (gamma-rate num-len report)))
-    (* gamma (epsilon-rate num-len gamma))))
+(defun solve-first-part ()
+  (let ((gamma (gamma-rate *number-length* *report*)))
+    (* gamma (epsilon-rate *number-length* gamma))))
 
 ;; Part II
 
 (defun oxygen-bit-criteria (nth report)
-  (if (>= (count #\1 (mapcar #'(lambda (seq) (elt seq nth))
-                             report))
-          (/ (length report) 2))
-      #\1
-      #\0))
+  (majority-bit nth report))
+
+(defun CO2-bit-criteria (nth report)
+  (if (char-equal #\1 (oxygen-bit-criteria nth report)) #\0 #\1))
+
+(defun rating-template (criteria-fn num-len report)
+  (loop with report = (copy-seq report)
+        for index from 0 below num-len
+        do (progn (setf report (remove-if-not
+                                #'(lambda (seq)
+                                    (char-equal (funcall criteria-fn index report)
+                                                (elt seq index)))
+                                report)))
+        until (= 1 (length report))
+        finally (return (parse-integer (car report) :radix 2))))
 
 (defun oxygen-rating (num-len report)
-  (loop with report = (copy-seq report)
-        for index from 0 below num-len
-        do (progn (setf report (remove-if-not
-                                #'(lambda (seq)
-                                    (char-equal (oxygen-bit-criteria index report)
-                                                (elt seq index)))
-                                report)))
-        until (= 1 (length report))
-        finally (return (parse-integer (car report) :radix 2))))
-
-(defun CO2-bit-criteria (oxygen-bit)
-  (if (char-equal #\1 oxygen-bit) #\0 #\1))
+  (rating-template #'oxygen-bit-criteria num-len report))
 
 (defun CO2-rating (num-len report)
-  (loop with report = (copy-seq report)
-        for index from 0 below num-len
-        do (progn (setf report (remove-if-not
-                                #'(lambda (seq)
-                                    (char-equal (co2-bit-criteria
-                                                 (oxygen-bit-criteria index report))
-                                                (elt seq index)))
-                                report)))
-        until (= 1 (length report))
-        finally (return (parse-integer (car report) :radix 2))))
+  (rating-template #'co2-bit-criteria num-len report))
 
 (defun solve-second-part ()
   (* (oxygen-rating *number-length* *report*)
