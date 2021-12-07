@@ -6,14 +6,14 @@
 (defun difference (n crab)
   (abs (- n crab)))
 
-(defun gauss-summ (n crab)
+(defun gauss-sum (n crab)
   (let ((num (difference n crab)))
     (/ (* (+ 1 num) num) 2)))
 
 (defun sum (lst)
   (reduce #'+ lst))
 
-(defun solve-first-part (crabs)
+(defun solve-problem (crabs)
   (let* ((sorted-crabs (stable-sort (crab-pos-list crabs) #'<=))
          (min-crab (first sorted-crabs))
          (max-crab (first (last sorted-crabs))))
